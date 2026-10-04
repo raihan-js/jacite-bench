@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Upload JaCite-Bench dataset to Hugging Face."""
+import subprocess, sys
 from huggingface_hub import HfApi
+
+subprocess.run([sys.executable, "scripts/merge_results.py"], check=True)  # keep every model in benchmark.json
 
 api = HfApi()
 

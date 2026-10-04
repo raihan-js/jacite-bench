@@ -27,7 +27,7 @@ LLMs cite Japanese law articles in their answers. But do those articles actually
 | Swallow-8B | 0/793 | 0/670 | 0.00% | 0.00% |
 | Qwen2.5-7B | 9/643 | 0/567 | **1.40%** | 0.00% |
 
-**LLMs invent Japanese law articles more often when asked in Japanese.** The llm-jp model's JA rate is 3.7× its EN rate. Qwen2.5-7B shows the same pattern (1.40% vs 0%). Swallow-8B is the most grounded — 0% in both languages.
+**Two of the three local models invent Japanese law articles more often when asked in Japanese.** The llm-jp model's JA rate is 3.7× its EN rate; Qwen2.5-7B shows the same direction (1.40% vs 0%). Swallow-8B, a Japanese-adapted Llama, invents none in either language.
 
 ### Uncertainty
 
@@ -41,25 +41,36 @@ Wilson 95% intervals and Fisher exact tests on the citation counts (rate = inven
 
 These treat each cited article as independent. Citations cluster within answers (300 questions per language), so the intervals and p-values are optimistic; a question-level bootstrap is the stricter test. The denominators differ because models cite more articles when answering in Japanese (1,554 vs 642 for llm-jp).
 
+### Did it cite the gold article?
+
+Share of questions where the cited articles include the gold article (from `benchmark.json`):
+
+| Model | JA | EN |
+|---|---|---|
+| llm-jp-3-1.8b | 292/300 (97.3%) | 298/300 (99.3%) |
+| Qwen2.5-7B | 273/300 (91.0%) | 300/300 (100%) |
+| Swallow-8B | 300/300 (100%) | 300/300 (100%) |
+
+The `real_not_gold` field in the dataset also records citations that exist in the registry but are not the gold article, so a "real but wrong" rate can be reported from the same data.
+
 ## Key findings
 
 1. **Language matters**: JA prompts produce more invented citations than EN prompts for 2 of 3 models
-2. **Model size isn't everything**: The 1.8B model has the highest JA rate; the 8B model has 0%
+2. **Size is not the whole story**: the 1.8B model has the highest JA rate and the 8B Japanese-adapted model has 0%, but the models also differ in training data, so this is not a clean size comparison
 3. **The normaliser is the hard part**: Kanji numerals, の-branch numbers, and English forms must all map to one canonical ID
-4. **Caption-generated questions are honest**: Questions are generated from official captions, not hand-written — the gold article is known without a legal expert
+4. **Caption-generated questions have a known gold article** without needing a legal expert, at the price of being easier than real questions
 
 ## Limitations
 
 - Checks that an article exists, not whether the legal reasoning is right
 - Questions are template-generated from captions — easier and less natural than real use
 - 3 local models only; no frontier API baselines
-- Questions come from official article captions, not from a legal expert
 
 ## What's next
 
 - Add frontier API baselines (GPT-4o, Claude)
 - Expand to more laws and more models
-- Add a "real but wrong article" column (exists in registry but not the gold article)
+- Report the "real but wrong article" rate (the `real_not_gold` field is already in the dataset)
 
 ---
 
