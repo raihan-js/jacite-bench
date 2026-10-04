@@ -1,4 +1,4 @@
-![JaCite-Bench results](https://raw.githubusercontent.com/raihan-js/jacite-bench/main/images/jacite.png)
+![JaCite-Bench results](https://raw.githubusercontent.com/raihan-js/jacite-bench/HEAD/images/jacite.png)
 
 # Do LLMs Invent Japanese Law Articles? A Bilingual Benchmark
 
