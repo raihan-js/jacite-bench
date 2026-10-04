@@ -27,6 +27,18 @@ LLMs cite Japanese law articles in their answers. But do those articles actually
 
 **LLMs invent Japanese law articles more often when asked in Japanese.** The llm-jp model's JA rate is 3.7× its EN rate. Qwen2.5-7B shows the same pattern (1.40% vs 0%). Swallow-8B is the most grounded — 0% in both languages.
 
+### Uncertainty
+
+Wilson 95% intervals and Fisher exact tests on the citation counts (rate = invented / all cited articles):
+
+| Model | JA invented | EN invented | JA 95% CI | EN 95% CI | Fisher p, JA vs EN |
+|---|---|---|---|---|---|
+| llm-jp-3-1.8b | 63/1,554 | 7/642 | [3.2%, 5.2%] | [0.5%, 2.2%] | 1.4e-4 |
+| Qwen2.5-7B | 9/643 | 0/567 | [0.7%, 2.6%] | [0.0%, 0.7%] | 0.0043 |
+| Swallow-8B | 0/793 | 0/670 | [0.0%, 0.5%] | [0.0%, 0.6%] | n/a |
+
+These treat each cited article as independent. Citations cluster within answers (300 questions per language), so the intervals and p-values are optimistic; a question-level bootstrap is the stricter test. The denominators differ because models cite more articles when answering in Japanese (1,554 vs 642 for llm-jp).
+
 ## Key findings
 
 1. **Language matters**: JA prompts produce more invented citations than EN prompts for 2 of 3 models
@@ -39,7 +51,7 @@ LLMs cite Japanese law articles in their answers. But do those articles actually
 - Checks that an article exists, not whether the legal reasoning is right
 - Questions are template-generated from captions — easier and less natural than real use
 - 3 local models only; no frontier API baselines
-- Japanese is limited; questions are generated from official text, not hand-written
+- Questions come from official article captions, not from a legal expert
 
 ## What's next
 
