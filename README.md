@@ -2,6 +2,8 @@
 
 ![JaCite-Bench results](images/jacite.png)
 
+Write-up: [Do LLMs Invent Japanese Law Articles? A Bilingual Benchmark](https://dev.to/raihan-js/do-llms-invent-japanese-law-articles-a-bilingual-benchmark-42l7)
+
 Do LLMs invent Japanese law articles? A bilingual benchmark that checks every statute article an LLM cites against the official e-Gov law registry.
 
 ## The problem
