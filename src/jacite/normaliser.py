@@ -104,26 +104,23 @@ def normalise_article_ref(ref: str) -> str | None:
     return None
 
 
-def extract_cited_articles(text: str) -> list[str]:
-    """Extract all article citations from a text.
+_NUM = r'[零一二三四五六七八九十百千\d]+'
+# One left-to-right pass. The first version ran three patterns one after the other over the whole text, which (a) returned citations grouped by pattern instead of in
+# text order and (b) reported the prefix 第二条 of every branch citation 第二条の二 as a second, phantom citation ("2"). Fixed 2026-10-06; see README, "Correction".
+_CITATION_RE = re.compile(rf'第({_NUM})条((?:の{_NUM})*)|Article\s+(\d+(?:-\d+)*)', re.IGNORECASE)
 
-    Returns a list of canonical article IDs.
-    """
+
+def extract_cited_articles(text: str) -> list[str]:
+    """Extract every article citation (one entry per mention, in text order) as a canonical id: 第二条の二 -> "2-2", 第百二十五条の二の三 -> "125-2-3", Article 541 -> "541"."""
     if not text:
         return []
-
-    # Pattern: 第...条 or Article ...
-    patterns = [
-        r'第[零一二三四五六七八九十百千\d]+条の[零一二三四五六七八九十百千\d]+',
-        r'第[零一二三四五六七八九十百千\d]+条',
-        r'Article\s+\d+(?:-\d+)?',
-    ]
-
     found = []
-    for pattern in patterns:
-        for m in re.finditer(pattern, text, re.IGNORECASE):
-            canonical = normalise_article_ref(m.group(0))
-            if canonical:
-                found.append(canonical)
-
+    for m in _CITATION_RE.finditer(text):
+        if m.group(1):
+            parts = [kanji_to_int(m.group(1))] + [kanji_to_int(b) for b in re.findall(rf'の({_NUM})', m.group(2))]
+            if None in parts:
+                continue
+            found.append("-".join(str(p) for p in parts))
+        else:
+            found.append(m.group(3))
     return found

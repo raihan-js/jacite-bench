@@ -114,3 +114,24 @@ class TestExtractCitedArticles:
         text = '第541条 and 第541条'
         result = extract_cited_articles(text)
         assert result.count('541') == 2
+
+
+class TestExtractCitedArticles:
+    """Regression tests for the extractor fixed on 2026-10-06 (phantom prefix citations, order)."""
+
+    def test_branch_citation_is_one_citation(self):
+        assert extract_cited_articles('第二条の二') == ['2-2']          # the old extractor also returned a phantom '2'
+        assert extract_cited_articles('民法第四百十二条の二') == ['412-2']
+
+    def test_multi_level_branch(self):
+        assert extract_cited_articles('第百二十五条の二の三') == ['125-2-3']
+
+    def test_text_order_and_one_entry_per_mention(self):
+        assert extract_cited_articles('第五条、Article 7、第五条、第三条の二') == ['5', '7', '5', '3-2']
+
+    def test_english_and_fullwidth_forms(self):
+        assert extract_cited_articles('See Article 415-2 and Article 541.') == ['415-2', '541']
+        assert extract_cited_articles('第５４１条') == ['541']
+
+    def test_empty(self):
+        assert extract_cited_articles('') == [] and extract_cited_articles(None) == []

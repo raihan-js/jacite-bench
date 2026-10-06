@@ -53,7 +53,7 @@ PYTHONPATH=src python scripts/run_benchmark.py
 ## Current status
 
 - Registry: 11 laws, 6,913 articles from e-Gov API
-- Normaliser: 25 tests passing
+- Normaliser: 23 tests passing (incl. regression tests for the phantom branch-citation bug fixed 2026-10-06)
 - Questions: 600 generated (300 JA, 300 EN)
-- Benchmark: running (4 models × 600 questions)
-- Pending: HF dataset, dev.to article
+- Benchmark: done (3 models × 600 questions). Rates are per mention. CORRECTED 2026-10-06: the first extractor reported the prefix of every branch citation as a phantom citation; corrected llm-jp JA 4.57% (63/1,379), Qwen2.5-7B JA 1.17% (7/597), Swallow-8B 0; see README "Correction" and scripts/rescore.py
+- HF dataset updated (corrected fields + *_v1 first-release fields); dev.to article queued

@@ -8,6 +8,12 @@
 
 > Scope note: 3 local Japanese-capable LLMs (1.8B–8B), 600 questions generated from official article captions. Not a legal accuracy test — a grounding test.
 
+## A correction before the results
+
+The first version of this repo, public since 2 October, used a citation extractor that reported the prefix of every branch citation as a second, phantom citation: 第二条の二 produced both "2-2" and "2". I found it while reusing the extractor in another project, where a test of branch articles failed. It inflated the citation counts in Japanese answers (llm-jp 1,554 to 1,379 mentions, Qwen2.5-7B 643 to 597, Swallow-8B 793 to 753; English unchanged) and counted two phantom Qwen citations as invented. The numbers below are corrected: llm-jp's Japanese rate goes from 4.05% to 4.57% (the Japanese/English ratio from 3.7× to 4.2×), Qwen2.5-7B's from 1.40% (9/643) to 1.17% (7/597), Swallow-8B stays at 0, the gold-hit counts do not change, and neither do the conclusions. `scripts/rescore.py` reproduces the first release's recorded counts exactly and the corrected ones from the published responses.
+
+A second caveat from the same audit: the registry's 6,913 listed articles include supplementary provisions and deleted placeholders ("削除"), so a citation of a deleted article such as 民法第208条 counts as real. Treating deleted placeholders as non-existent gives 66/1,379 (llm-jp, Japanese), 12/597 (Qwen2.5-7B, Japanese) and 2/753 (Swallow-8B, Japanese); the English counts do not change.
+
 ## The problem
 
 LLMs cite Japanese law articles in their answers. But do those articles actually exist? Most Japanese LLM evals score answers against gold labels. This one checks grounding against a symbolic source of truth — the e-Gov Law API v2.
@@ -23,23 +29,23 @@ LLMs cite Japanese law articles in their answers. But do those articles actually
 
 | Model | JA invented | EN invented | JA rate | EN rate |
 |---|---|---|---|---|
-| llm-jp-3-1.8b | 63/1554 | 7/642 | **4.05%** | **1.09%** |
-| Swallow-8B | 0/793 | 0/670 | 0.00% | 0.00% |
-| Qwen2.5-7B | 9/643 | 0/567 | **1.40%** | 0.00% |
+| llm-jp-3-1.8b | 63/1,379 | 7/642 | **4.57%** | **1.09%** |
+| Swallow-8B | 0/753 | 0/670 | 0.00% | 0.00% |
+| Qwen2.5-7B | 7/597 | 0/567 | **1.17%** | 0.00% |
 
-**Two of the three local models invent Japanese law articles more often when asked in Japanese.** The llm-jp model's JA rate is 3.7× its EN rate; Qwen2.5-7B shows the same direction (1.40% vs 0%). Swallow-8B, a Japanese-adapted Llama, invents none in either language.
+**Two of the three local models invent Japanese law articles more often when asked in Japanese.** The llm-jp model's JA rate is 4.2× its EN rate; Qwen2.5-7B shows the same direction (1.17% vs 0%). Swallow-8B, a Japanese-adapted Llama, invents none in either language (under the registry definition below; 2 of 753 Japanese mentions if deleted placeholders are excluded).
 
 ### Uncertainty
 
-Wilson 95% intervals and Fisher exact tests on the citation counts (rate = invented / all cited articles):
+Wilson 95% intervals and Fisher exact tests on the citation counts (rate = invented mentions / all cited mentions; a citation repeated in an answer counts each time):
 
 | Model | JA invented | EN invented | JA 95% CI | EN 95% CI | Fisher p, JA vs EN |
 |---|---|---|---|---|---|
-| llm-jp-3-1.8b | 63/1,554 | 7/642 | [3.2%, 5.2%] | [0.5%, 2.2%] | 1.4e-4 |
-| Qwen2.5-7B | 9/643 | 0/567 | [0.7%, 2.6%] | [0.0%, 0.7%] | 0.0043 |
-| Swallow-8B | 0/793 | 0/670 | [0.0%, 0.5%] | [0.0%, 0.6%] | n/a |
+| llm-jp-3-1.8b | 63/1,379 | 7/642 | [3.6%, 5.8%] | [0.5%, 2.2%] | 2.1e-5 |
+| Qwen2.5-7B | 7/597 | 0/567 | [0.6%, 2.4%] | [0.0%, 0.7%] | 0.016 |
+| Swallow-8B | 0/753 | 0/670 | [0.0%, 0.5%] | [0.0%, 0.6%] | n/a |
 
-These treat each cited article as independent. Citations cluster within answers (300 questions per language), so the intervals and p-values are optimistic; a question-level bootstrap is the stricter test. The denominators differ because models cite more articles when answering in Japanese (1,554 vs 642 for llm-jp).
+These treat each cited article as independent. Citations cluster within answers (300 questions per language), so the intervals and p-values are optimistic; a question-level bootstrap is the stricter test. The denominators differ because models cite more articles when answering in Japanese (1,379 vs 642 for llm-jp).
 
 ### Did it cite the gold article?
 
